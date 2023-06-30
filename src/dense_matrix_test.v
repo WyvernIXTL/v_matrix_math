@@ -7,7 +7,7 @@
 module v_matrix_math
 
 fn test_new_dense_matrix() {
-	a := DenseMatrix.new[f64](34, 60, -123.456)?
+	a := DenseMatrix.new[f64](34, 60, -123.456)
 	assert a.row_size() == 34
 	assert a.column_size() == 60
 	for i in 0..34 {
@@ -18,7 +18,7 @@ fn test_new_dense_matrix() {
 }
 
 fn test_new_identity_dense_matrix() {
-	a := DenseMatrix.new_identity[f64](40, 43)?
+	a := DenseMatrix.new_identity[f64](40, 43)
 	assert a.row_size() == 40
 	assert a.column_size() == 43
 	for i in 0..a.row_size() {
@@ -27,3 +27,46 @@ fn test_new_identity_dense_matrix() {
 		}
 	}
 } 
+
+fn test_inplace_scalar_multiplication() {
+	mut a := DenseMatrix.new_identity[f64](9, 8)
+	assert a.row_size() == 9
+	assert a.column_size() == 8
+	a.inplace_scalar_multiplication(3.0)
+	for i in 0..a.row_size() {
+		for j in 0..a.column_size() {
+			assert if i == j { a.get(i, j) == 3.0 } else { a.get(i, j) == 0.0 }
+		}
+	}
+}
+
+fn test_matrix_multiplication() {
+	a := DenseMatrix.new_from_array([
+		[1, 0, 1],
+		[2, 1, 1],
+		[0, 1, 1],
+		[1, 1, 2]
+	])
+	b := DenseMatrix.new_from_array([
+		[1, 2, 1],
+		[2, 3, 1],
+		[4, 2, 2]
+	])
+
+	c := a * b
+	
+	d := DenseMatrix.new_from_array([
+		[5, 4, 3],
+		[8, 9, 5],
+		[6, 5, 3],
+		[11, 9, 6]
+	])
+
+	assert c == d
+
+	for i in 0..d.row_size() {
+		for j in 0..d.column_size() {
+			assert c.get(i, j) == d.get(i, j)
+		}
+	}
+}
