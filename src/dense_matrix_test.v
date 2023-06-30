@@ -78,11 +78,7 @@ fn test_inplace_lu_no_pivot() {
 		[3.0, 3.0, 1.0]
 	])
 
-	mut b := DenseMatrix.new_from_array[f64]([
-		[1.0, 2.0, 3.0],
-		[1.0, 1.0, 1.0],
-		[3.0, 3.0, 1.0]
-	])
+	mut b := DenseMatrix.new_from_dense_matrix(a)
 
 	a.inplace_lu_no_pivot()
 

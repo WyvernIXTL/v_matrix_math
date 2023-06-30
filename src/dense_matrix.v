@@ -20,6 +20,10 @@ pub fn DenseMatrix.new_from_array[T](array [][]T) DenseMatrix[T] {
 	return DenseMatrix[T]{matrix: array}
 }
 
+pub fn DenseMatrix.new_from_dense_matrix[T](matrix DenseMatrix[T]) DenseMatrix[T] {
+	return DenseMatrix.new_from_array(matrix.matrix.clone())
+}
+
 pub fn (matrix DenseMatrix[T]) get[T](i int, j int) T {
 	return matrix.matrix[i][j]
 }
