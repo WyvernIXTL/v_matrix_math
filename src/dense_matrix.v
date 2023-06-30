@@ -42,11 +42,20 @@ pub fn (matrix DenseMatrix[T]) column_size() int {
 
 pub fn (matrix DenseMatrix[T]) str() string {
 	mut s := ""
-	for i in 0..matrix.row_size() {
-		for j in 0..matrix.column_size() {
-			s += "${matrix.matrix[i][j]:15}"
+	if f64(matrix.matrix[0][0]) == matrix.matrix[0][0] {
+		for i in 0..matrix.row_size() {
+			for j in 0..matrix.column_size() {
+				s += "${f64(matrix.matrix[i][j]):15.3g}"
+			}
+			s += "\n"
 		}
-		s += "\n"
+	} else {
+		for i in 0..matrix.row_size() {
+			for j in 0..matrix.column_size() {
+				s += "${matrix.matrix[i][j]:15}"
+			}
+			s += "\n"
+		}
 	}
 	return s
 }
@@ -126,6 +135,50 @@ pub fn (matrix DenseMatrix[T]) get_u_from_lu[T]() DenseMatrix[T] {
 	for i in 0..matrix.row_size() {
 		for j in i..matrix.column_size() {
 			u.set(i, j, matrix.get(i, j))
+		}
+	}
+	return u
+}
+
+pub fn (mut matrix DenseMatrix[T]) inplace_lu_row_pivot() []int {
+	if matrix.column_size() < matrix.row_size() {
+		panic("matrix.column_size() < matrix.row_size()")
+	}
+	mut index := []int{len: matrix.row_size()} 
+	for i in 0..index.len {
+		index[i] = i
+	}
+	for row in 0..matrix.row_size() {
+		for i in (row+1)..matrix.row_size() {
+			if matrix.matrix[index[i]][row] > matrix.matrix[index[row]][row] {
+				index[i], index[row] = index[row], index[i]
+			}
+		}
+		for i in (row+1)..matrix.row_size() {
+			matrix.matrix[index[i]][row] /= matrix.matrix[index[row]][row]
+			for j in (row+1)..matrix.column_size() {
+				matrix.matrix[index[i]][j] -= matrix.matrix[index[row]][j] * matrix.matrix[index[i]][row]
+			}
+		}
+	}
+	return index
+}
+
+pub fn (matrix DenseMatrix[T]) get_l_from_pivoted_lu[T](index []int) DenseMatrix[T] {
+	mut l := DenseMatrix.new_identity[T](matrix.row_size(), matrix.column_size())
+	for i in 1..matrix.row_size() {
+		for j in 0..i {
+			l.set(i, j, matrix.get(index[i], j))
+		}
+	}
+	return l
+}
+
+pub fn (matrix DenseMatrix[T]) get_u_from_pivoted_lu[T](index []int) DenseMatrix[T] {
+	mut u := DenseMatrix.new[T](matrix.row_size(), matrix.column_size(), T(0))
+	for i in 0..matrix.row_size() {
+		for j in i..matrix.column_size() {
+			u.set(i, j, matrix.get(index[i], j))
 		}
 	}
 	return u

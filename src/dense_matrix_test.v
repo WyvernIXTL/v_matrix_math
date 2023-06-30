@@ -84,3 +84,23 @@ fn test_inplace_lu_no_pivot() {
 
 	assert b == (a.get_l_from_lu() * a.get_u_from_lu() )
 }
+
+fn test_inplace_lu_row_pivot() {
+	mut a := DenseMatrix.new_from_array[f64]([
+		[1.0, 2.0, 3.0],
+		[1.0, 1.0, 1.0],
+		[3.0, 3.0, 1.0]
+	])
+
+	mut b := DenseMatrix.new_from_dense_matrix(a)
+
+	index := a.inplace_lu_row_pivot()
+
+	c := a.get_l_from_pivoted_lu(index) * a.get_u_from_pivoted_lu(index)
+
+	for i in 0..c.row_size() {
+		for j in 0..c.column_size() {
+			assert b.get(index[i], j) == c.get(i, j)
+		}
+	}
+}
