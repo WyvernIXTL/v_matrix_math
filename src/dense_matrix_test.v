@@ -70,3 +70,21 @@ fn test_matrix_multiplication() {
 		}
 	}
 }
+
+fn test_inplace_lu_no_pivot() {
+	mut a := DenseMatrix.new_from_array[f64]([
+		[1.0, 2.0, 3.0],
+		[1.0, 1.0, 1.0],
+		[3.0, 3.0, 1.0]
+	])
+
+	mut b := DenseMatrix.new_from_array[f64]([
+		[1.0, 2.0, 3.0],
+		[1.0, 1.0, 1.0],
+		[3.0, 3.0, 1.0]
+	])
+
+	a.inplace_lu_no_pivot()
+
+	assert b == (a.get_l_from_lu() * a.get_u_from_lu() )
+}

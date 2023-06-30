@@ -48,11 +48,11 @@ pub fn (matrix DenseMatrix[T]) str() string {
 }
 
 pub fn DenseMatrix.new_identity[T](row_size int, column_size int) DenseMatrix[T] {
-	mut matrix := DenseMatrix.new[T](row_size, column_size, 0)
+	mut matrix := DenseMatrix.new[T](row_size, column_size, T(0))
 	for i in 0..row_size {
 		for j in 0..column_size {
 			if i == j {
-				matrix.set[T](i, j, 1)
+				matrix.set[T](i, j, T(1))
 			}
 		}
 	}
@@ -71,7 +71,7 @@ pub fn (left_matrix DenseMatrix[T]) * (right_matrix DenseMatrix[T]) DenseMatrix[
 	if left_matrix.column_size() != right_matrix.row_size() {
 		panic("left_matrix.column_size() != right_matrix.row_size()")
 	}
-	mut new_matrix := DenseMatrix.new[T](left_matrix.row_size(), right_matrix.column_size(), 0)
+	mut new_matrix := DenseMatrix.new[T](left_matrix.row_size(), right_matrix.column_size(), T(0))
 	for i in 0..new_matrix.row_size() {
 		for j in 0..new_matrix.column_size() {
 			for x in 0..left_matrix.column_size() {
@@ -80,7 +80,6 @@ pub fn (left_matrix DenseMatrix[T]) * (right_matrix DenseMatrix[T]) DenseMatrix[
 		}
 	}
 	return new_matrix
-	
 }
 
 pub fn (left_matrix DenseMatrix[T]) == (right_matrix DenseMatrix[T]) bool {
@@ -92,4 +91,38 @@ pub fn (left_matrix DenseMatrix[T]) == (right_matrix DenseMatrix[T]) bool {
 		}
 	}
 	return rval
+}
+
+pub fn (mut matrix DenseMatrix[T]) inplace_lu_no_pivot() {
+	if matrix.column_size() < matrix.row_size() {
+		panic("matrix.column_size() < matrix.row_size()")
+	}
+	for row in 0..matrix.row_size() {
+		for i in (row+1)..matrix.row_size() {
+			matrix.matrix[i][row] /= matrix.matrix[row][row]
+			for j in (row+1)..matrix.column_size() {
+				matrix.matrix[i][j] -= matrix.matrix[row][j] * matrix.matrix[i][row]
+			}
+		}
+	}
+}
+
+pub fn (matrix DenseMatrix[T]) get_l_from_lu[T]() DenseMatrix[T] {
+	mut l := DenseMatrix.new_identity[T](matrix.row_size(), matrix.column_size())
+	for i in 1..matrix.row_size() {
+		for j in 0..i {
+			l.set(i, j, matrix.get(i, j))
+		}
+	}
+	return l
+}
+
+pub fn (matrix DenseMatrix[T]) get_u_from_lu[T]() DenseMatrix[T] {
+	mut u := DenseMatrix.new[T](matrix.row_size(), matrix.column_size(), T(0))
+	for i in 0..matrix.row_size() {
+		for j in i..matrix.column_size() {
+			u.set(i, j, matrix.get(i, j))
+		}
+	}
+	return u
 }
